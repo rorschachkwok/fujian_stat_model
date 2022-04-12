@@ -1,3 +1,5 @@
+rm(list = ls())
+
 V0 <- read.xlsx('pop_of_S_28.xlsx', sheet = 1)
 V0 <- V0$n_fujian # inital value for number of susceptible stratified by vaccination status
 V0 <- matrix(V0, nrow = 7, byrow = T)
@@ -27,7 +29,7 @@ f <- as.matrix(f_raw)
 # combining parameter and initial values
 parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
               omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
-INPUT <- c(V0, E0, P0, A0, I0, R0)
+INPUT <- c(t(V0), t(E0), t(P0), t(A0), t(I0), t(R0))
 # INPUT <- list(V = V0, E = E0, P = P0, A = A0, I = I0, R = R0)
 
 ND <- 365 # time to simulate
@@ -42,27 +44,27 @@ t_range <- seq(from= t_start, to=t_end+t_inc, by=t_inc) # vector with time steps
 # differential equations --------------------------------------------------
 
 diff_eqs <- function(times, INPUT, parms){
-        # V <- matrix(INPUT[[1]][1:28], nrow = 7)
-        # E <- matrix(INPUT[[1]][29:56], nrow = 7)
-        # P <- matrix(INPUT[[1]][57:84], nrow = 7)
-        # A <- matrix(INPUT[[1]][85:112], nrow = 7)
-        # I <- matrix(INPUT[[1]][113:140], nrow = 7)
-        # R <- matrix(INPUT[[1]][141:168], nrow = 7)
-        a <- list(V = V0, E = E0, P = P0, A = A0, I = I0, R = R0, kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
-                  omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
-        with(a, {
-                        
+        
+        # a <- list(V = V0, E = E0, P = P0, A = A0, I = I0, R = R0, kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
+        #           omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
+        with(as.list(INPUT, parms), {
+                        V <- matrix(INPUT[1:28], nrow = 7, byrow = T)
+                        E <- matrix(INPUT[29:56], nrow = 7, byrow = T)
+                        P <- matrix(INPUT[57:84], nrow = 7, byrow = T)
+                        A <- matrix(INPUT[85:112], nrow = 7, byrow = T)
+                        I <- matrix(INPUT[113:140], nrow = 7, byrow = T)
+                        R <- matrix(INPUT[141:168], nrow = 7, byrow = T)
                         lambda <- t(beta) %*% rowSums(I + kappa1*P + kappa2*A)
-                        dV <- -matrix(rep(as.numeric(t(lambda)), each = 4), nrow = nrow(lambda), byrow = TRUE) * HR * V  
-                        dE <- matrix(rep(as.numeric(t(lambda)), each = 4), nrow = nrow(lambda), byrow = TRUE) - mu*omega*E - (1-mu)*omegap*E
+                        dV <- -c(lambda) * HR * V  
+                        dE <- c(lambda) * HR * V - mu*omega*E - (1-mu)*omegap*E
                         dP <- (1-mu)*omegap*E - omegapp*P
                         dA <- mu*omega*E - gammap*A
                         dI <- omegapp*P - gamma*I - f*I
                         dR <- gamma*I + gammap*A
-                        return(list(c(dV, dE, dP, dA, dI, dR)))
-                
+                        # return(list(c(dV, dE, dP, dA, dI, dR)))
+                        list(c(t(dV), t(dE), t(dP), t(dA), t(dI), t(dR)))
                 # list(dY) 
-        })
+         })
 }
 
 out <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')

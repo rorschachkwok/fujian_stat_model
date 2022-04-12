@@ -11,7 +11,7 @@ pacman::p_load(
 
 
 # PARAMETERS --------------------------------------------------------------
-
+rm(list = ls())
 m <- 28  #number of age and vac classes
 
 # inital value FOR six compartment
