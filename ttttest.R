@@ -1,3 +1,37 @@
+# example -----------------------------------------------------------------
+
+# init       <- c(S1=1-1e-6, S2=1-1e-6, I1=1e-6, I2=1e-6, R1=0.0, R2=0.0)
+# parameters <- c(beta1=1.4247, beta2=1.4247, gamma=0.14286)
+# times      <- seq(0, 70, by = 1)
+# 
+# MODEL <- function(time, state, parameters) {
+#         with(as.list(c(state, parameters)), {
+#                 S = matrix(state[1:2], nrow = 2, ncol=1)
+#                 I = matrix(state[3:4], nrow = 2, ncol=1)
+#                 R = matrix(state[5:6], nrow = 2, ncol=1)
+#                 beta = matrix(c(beta1, beta2), nrow = 2, ncol=1) 
+#                 dS <- -1*(beta) %*% t(S) %*% I
+#                 dI <-  beta %*% t(S) %*% I - gamma * I
+#                 dR <-  gamma * I
+#                 return(list(c(dS, dI, dR)))
+#         })
+# }
+# 
+# o <- ode(y=init, times=times, func=MODEL, parms=parameters)
+# o <- as.data.frame(o)
+
+
+#Loading all necessary libraries 
+pacman::p_load(
+        deSolve,
+        tidyverse,
+        openxlsx,
+        MetBrewer,
+        ggsci,
+        scales,
+        patchwork
+)
+
 rm(list = ls())
 
 V0 <- read.xlsx('pop_of_S_28.xlsx', sheet = 1)
@@ -29,7 +63,7 @@ f <- as.matrix(f_raw)
 # combining parameter and initial values
 parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
               omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
-INPUT <- c(t(V0), t(E0), t(P0), t(A0), t(I0), t(R0))
+INPUT <- c(t(V0), t(E0), t(P0), t(A0), t(I0), t(R0)) # same order as ode return list
 # INPUT <- list(V = V0, E = E0, P = P0, A = A0, I = I0, R = R0)
 
 ND <- 365 # time to simulate
@@ -47,13 +81,14 @@ diff_eqs <- function(times, INPUT, parms){
         
         # a <- list(V = V0, E = E0, P = P0, A = A0, I = I0, R = R0, kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
         #           omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
-        with(as.list(INPUT, parms), {
+        with(as.list(c(INPUT, parms)), {
                         V <- matrix(INPUT[1:28], nrow = 7, byrow = T)
                         E <- matrix(INPUT[29:56], nrow = 7, byrow = T)
                         P <- matrix(INPUT[57:84], nrow = 7, byrow = T)
                         A <- matrix(INPUT[85:112], nrow = 7, byrow = T)
                         I <- matrix(INPUT[113:140], nrow = 7, byrow = T)
                         R <- matrix(INPUT[141:168], nrow = 7, byrow = T)
+                        
                         lambda <- t(beta) %*% rowSums(I + kappa1*P + kappa2*A)
                         dV <- -c(lambda) * HR * V  
                         dE <- c(lambda) * HR * V - mu*omega*E - (1-mu)*omegap*E
@@ -62,14 +97,18 @@ diff_eqs <- function(times, INPUT, parms){
                         dI <- omegapp*P - gamma*I - f*I
                         dR <- gamma*I + gammap*A
                         # return(list(c(dV, dE, dP, dA, dI, dR)))
-                        list(c(t(dV), t(dE), t(dP), t(dA), t(dI), t(dR)))
-                # list(dY) 
+                        list(c(t(dV), t(dE), t(dP), t(dA), t(dI), t(dR))) # same order as the INPUT
          })
 }
 
 out <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
 out <- as.data.frame(out)
-m <- 28
+
+# with(out, {
+#         plot(x = time, y = `1`)})
+# min(out$`1`)
+
+
 # change param to cut factory
 beta <- read.xlsx('Beta_28_cut_f.xlsx', sheet = 2, colNames = F)
 beta <- as.matrix(beta) 
