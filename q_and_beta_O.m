@@ -2,11 +2,11 @@ clear all; close all; clc;
 
 import_params_omicron;   % import parameters omega, gamma, p, kappa,...
 N = readmatrix('agePopulationVector.xlsx'); % the population vector (stratified by age)
-C = readmatrix('cntm_cut_factory.xlsx', Sheet='Sheet 1');   % the contact matrix
+C = readmatrix('contactMatrix.xlsx', Sheet='Sheet 1');   % the contact matrix
 
 
-params.Beta_cut_f   = C * 0.5060 ./ (N'); 
-Beta_28_cut_f = kron(params.Beta_cut_f, ones(4));
+% params.Beta_cut_f   = C * 0.5060 ./ (N'); 
+% Beta_28_cut_f = kron(params.Beta_cut_f, ones(4));
 % params.Beta_cut_s   = C * 0.5060 ./ (N');
 % Beta_28_cut_s = kron(params.Beta_cut_s, ones(4));
 
