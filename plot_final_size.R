@@ -225,14 +225,14 @@ wsf <- wsf %>%
         mutate(scenario = fct_relevel(scenario, 'w', 'c_s', 'c_f'))
 
 # plot
-facet_label <- c('Whole population', 'Close school', 'Close factory')
+facet_label <- c('Whole population', 'School closure', 'Factory closure')
 facet_hide <- levels(wsf$scenario)
 names(facet_label) <- facet_hide
 
 hfinal <- wsf %>% 
         group_by(age_group, vac_group, scenario) %>% 
         summarise(
-                final_size = max(final_size)*100,
+                final_size = max(final_size),
                 .groups = 'drop'
         )
 
@@ -244,13 +244,13 @@ d_final <- ggplot(data = hfinal, aes(x = vac_group,   # x-axis is case age
                                 fill = final_size))+    # use long data, with proportions as Freq
         geom_tile(                    # visualize it in tiles
                 color = 'grey')+     # color of the tile is the Freq column in the data
-        geom_text(aes(label = round(final_size, 3)), color = "black", size = 4) +
+        geom_text(aes(label = format(round(final_size, 3), nsmall = 3)), color = "black", size = 4) +
         coord_fixed()+ # 保持为正方形
         
         scale_fill_gradient(low = 'white', high = 'coral3',
                             # na.value = 'azure4',
-                             limits=c(0, 100),
-                             breaks=seq(0,100,by=20))+
+                             limits=c(0, 1),
+                             breaks=seq(0,1,by=0.2))+
         
         scale_y_discrete(
                 expand = c(0,0),
@@ -271,16 +271,16 @@ d_final <- ggplot(data = hfinal, aes(x = vac_group,   # x-axis is case age
                 # axis.text.x = element_blank(),
                 axis.text.x =element_text(angle = 0, vjust = 0.5, colour = 'black', size = 10),
                 axis.text  = element_text(size = 8),
-                axis.title = element_text(face = 'bold', size = 12),
+                axis.title = element_text(face = 'bold', size = 10),
                 plot.title = element_text(hjust = 0, size = 14),
-                strip.text = element_text(face = 'bold', size = 12)
+                strip.text = element_text(face = 'bold', size = 10)
         )+
         facet_grid(cols = vars(scenario), 
                    labeller = labeller(scenario = facet_label))+
         labs(                         
                 x = "Vaccination status",
                 y = "Age category",
-                title = 'Final size for a Delta epidemic over 9-month simulation period (%)',
+                title = 'a',
                 fill = NULL     
         )
 
@@ -290,12 +290,12 @@ o_final <- ggplot(data = hfinal, aes(x = vac_group,   # x-axis is case age
                                fill = final_size))+    # use long data, with proportions as Freq
         geom_tile(                    # visualize it in tiles
                 color = 'grey')+     # color of the tile is the Freq column in the data
-        geom_text(aes(label = round(final_size, 2)), color = "black", size = 4) +
+        geom_text(aes(label = format(round(final_size, 3), nsmall = 3)), color = "black", size = 4) +
         coord_fixed()+ # 保持为正方形
         
         scale_fill_gradient(low = 'white', high = 'coral3',
-                            limits=c(0, 100),
-                            breaks=seq(0,100,by=20))+
+                            limits=c(0, 1),
+                            breaks=seq(0,1,by=0.2))+
         
         scale_y_discrete(
                 expand = c(0,0),
@@ -316,16 +316,16 @@ o_final <- ggplot(data = hfinal, aes(x = vac_group,   # x-axis is case age
                 # axis.text.x = element_blank(),
                 axis.text.x =element_text(angle = 0, vjust = 0.5, colour = 'black', size = 10),
                 axis.text  = element_text(size = 8),
-                axis.title = element_text(face = 'bold', size = 12),
+                axis.title = element_text(face = 'bold', size = 10),
                 plot.title = element_text(hjust = 0, size = 14),
-                strip.text = element_text(face = 'bold', size = 12)
+                strip.text = element_text(face = 'bold', size = 10)
         )+
         facet_grid(cols = vars(scenario), 
                    labeller = labeller(scenario = facet_label))+
         labs(                         
                 x = "Vaccination status",
                 y = "Age category",
-                title = 'Final size for an Omicron epidemic over 9-month simulation period (%)',
+                title = 'b',
                 fill = NULL     
         )
 

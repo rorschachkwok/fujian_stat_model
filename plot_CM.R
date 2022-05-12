@@ -1,3 +1,11 @@
+pacman::p_load(
+        tidyverse,
+        openxlsx,
+        ggsci,
+        patchwork
+        
+)
+
 cnt_df <- read.xlsx('contactMatrix.xlsx', sheet = 2, colNames = T)
 cnt_long <- cnt_df %>% 
         pivot_longer(
@@ -42,13 +50,12 @@ p_w <- ggplot(data = cnt_long)+    # use long data, with proportions as Freq
         labs(                         
                 x = "Age of index case",
                 y = "Age of contact",
-                title = 'Whole population',
+                title = NULL,
                 fill = NULL     
         )
 
 
 # school matrix -----------------------------------------------------------
-library(ggsci)
 cnt_s <- read.xlsx('cntm_school.xlsx', sheet = 2, colNames = T)
 cnt_s_long <- cnt_s %>% 
         pivot_longer(
@@ -90,7 +97,7 @@ p_s <- ggplot(data = cnt_s_long)+    # use long data, with proportions as Freq
         labs(                         
                 x = "Age of index case",
                 y = "Age of contact",
-                title = 'School',
+                title = NULL,
                 fill = NULL     
         )
 
@@ -135,15 +142,14 @@ p_f <- ggplot(data = cnt_f_long)+    # use long data, with proportions as Freq
         labs(                         
                 x = "Age of index case",
                 y = "Age of contact",
-                title = 'Factory',
+                title = NULL,
                 fill = NULL     
         )
 
 
 
-library(patchwork)
 patchwork <-  p_w | p_s | p_f
-patchwork + plot_annotation(tag_levels = 'A')      
+patchwork + plot_annotation(tag_levels = 'a')      
 
 ggsave('Fig_cntm.pdf', height = 3, width = 10.5, dpi = 300)
 ggsave('Fig3.tiff', height = 4, width = 4.5, dpi = 300)

@@ -77,7 +77,7 @@ hmap_wsf <- hmap_wsf %>%
         mutate(scenario = fct_relevel(scenario, 'w', 'c_s', 'c_f'))
 
 # plot delta --------------------------------------------------------------
-facet_label <- c('Whole population', 'Close school', 'Close factory')
+facet_label <- c('Whole population', 'School closure', 'Factory closure')
 facet_hide <- levels(hmap_wsf$scenario)
 names(facet_label) <- facet_hide
 d <- ggplot(data = hmap_wsf,aes(x = vac,   # x-axis is case age
@@ -85,7 +85,7 @@ d <- ggplot(data = hmap_wsf,aes(x = vac,   # x-axis is case age
                            fill = each_f_per_10k))+    # use long data, with proportions as Freq
         geom_tile(                    # visualize it in tiles
                 color = 'grey')+     # color of the tile is the Freq column in the data
-        geom_text(aes(label = each_f_per_10k), color = "black", size = 4) +
+        geom_text(aes(label = format(round(each_f_per_10k, 2), nsmall = 2)), color = "black", size = 4) +
         coord_fixed()+ # 保持为正方形
         
         scale_fill_distiller(palette = 'Spectral',
@@ -111,16 +111,16 @@ d <- ggplot(data = hmap_wsf,aes(x = vac,   # x-axis is case age
                 # axis.text.x = element_blank(),
                 axis.text.x =element_text(angle = 0, vjust = 0.5, colour = 'black', size = 10),
                 axis.text  = element_text(size = 8),
-                axis.title = element_text(face = 'bold', size = 12),
+                axis.title = element_text(face = 'bold', size = 10),
                 plot.title = element_text(hjust = 0, size = 14),
-                strip.text = element_text(face = 'bold', size = 12)
+                strip.text = element_text(face = 'bold', size = 10)
         )+
         facet_grid(cols = vars(scenario), 
                    labeller = labeller(scenario = facet_label))+
         labs(                         
                 x = "Vaccination status",
                 y = "Age category",
-                title = 'Death toll caused by Delta variant in each cell (1/10000)',
+                title = 'a',
                 fill = NULL     
         )
 
@@ -131,7 +131,7 @@ o <- ggplot(data = hmap_wsf,aes(x = vac,   # x-axis is case age
                                  fill = each_f_per_10k))+    # use long data, with proportions as Freq
         geom_tile(                    # visualize it in tiles
                 color = 'grey')+     # color of the tile is the Freq column in the data
-        geom_text(aes(label = each_f_per_10k), color = "black", size = 4) +
+        geom_text(aes(label = format(round(each_f_per_10k, 2), nsmall = 2)), color = "black", size = 4) +
         coord_fixed()+ # 保持为正方形
         
         scale_fill_distiller(palette = 'Spectral',
@@ -157,20 +157,20 @@ o <- ggplot(data = hmap_wsf,aes(x = vac,   # x-axis is case age
                 # axis.text.x = element_blank(),
                 axis.text.x =element_text(angle = 0, vjust = 0.5, colour = 'black', size = 10),
                 axis.text  = element_text(size = 8),
-                axis.title = element_text(face = 'bold', size = 12),
+                axis.title = element_text(face = 'bold', size = 10),
                 plot.title = element_text(hjust = 0, size = 14),
-                strip.text = element_text(face = 'bold', size = 12)
+                strip.text = element_text(face = 'bold', size = 10)
         )+
         facet_grid(cols = vars(scenario), 
                    labeller = labeller(scenario = facet_label))+
         labs(                         
                 x = "Vaccination status",
                 y = "Age category",
-                title = 'Death toll caused by Omicron variant in each cell (1/10000)',
+                title = 'b',
                 fill = NULL     
         )
 
 death_toll <- plot_grid(d, o, nrow = 2)
-ggsave('test_death_toll.pdf', height = 10, width = 8, dpi = 300)
+ggsave('death_toll.pdf', height = 10, width = 8, dpi = 300)
 
         
