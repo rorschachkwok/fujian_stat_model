@@ -1,13 +1,14 @@
 # plot delta--------------------------------------------------------------------
-# 使用facet_grid时候，给不同分组添加分组标题
-facet_label <- c('Whole population', 'School closure', 'Factory closure') 
+# 使用facet_时候，给不同分组添加分组标题
+facet_label <- c('Whole population', 'School closure', 
+                 'Factory closure', 'School + factory closure') 
 facet_hide <- levels(wsf$scenario)
 names(facet_label) <- facet_hide
-# 可以共用的theme设置
+# 可以共用的theme
 theme_delta <- function(){
         
         theme_classic()+
-                theme(axis.title = element_text(face = 'bold'),
+                theme(axis.title = element_text(color = 'black', size = 10),
                       legend.spacing.x=unit(0.1,'cm'), # 定义文本水平距离
                       legend.key.width=unit(1.5,'cm'), # 定义图例水平大小
                       legend.key.height=unit(0.5,'cm'), # 定义图例垂直大小
@@ -33,7 +34,7 @@ ag1 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129"),
@@ -42,7 +43,7 @@ ag1 <- wsf %>%
                            '60+ days since second dose', 
                            'At most partially vaccinated')) + 
         theme_classic()+
-        theme(axis.title = element_text(face = 'bold'),
+        theme(axis.title = element_text(color = 'black', size = 10),
               legend.spacing.x=unit(0.1,'cm'), 
               legend.key.width=unit(1.5,'cm'), 
               legend.key.height=unit(0.5,'cm'), 
@@ -56,7 +57,7 @@ ag1 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "0-9 years old",
+                y = "New cases per 10,000\n(0-9 years old)",
                 color = NULL)+
         # 按场景分组画图
         facet_grid(cols = vars(scenario), scales =  "fixed",
@@ -76,7 +77,7 @@ ag2 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -84,7 +85,7 @@ ag2 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "10-19 years old",
+                y = "New cases per 10,000\n(10-19 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -102,14 +103,14 @@ ag3 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) +
         theme_delta()+
         labs(
                 x = NULL,
-                y = "20-29 years old",
+                y = "New cases per 10,000\n(20-29 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -127,7 +128,7 @@ ag4 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -135,7 +136,7 @@ ag4 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "30-39 years old",
+                y = "New cases per 10,000\n(30-39 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -153,7 +154,7 @@ ag5 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -162,7 +163,7 @@ ag5 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "40-49 years old",
+                y = "New cases per 10,000\n(40-49 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -180,7 +181,7 @@ ag6 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -189,7 +190,7 @@ ag6 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "50-59 years old",
+                y = "New cases per 10,000\n(50-59 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -208,7 +209,7 @@ ag7 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -216,7 +217,7 @@ ag7 <- wsf %>%
         
         labs(
                 x = 'Time (days)',
-                y = "60+ years old",
+                y = "New cases per 10,000\n(60+ years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed")
 
@@ -229,17 +230,14 @@ patchwork <- ag1/
         ag7
 
 
-ggsave('rolling_week_delta.pdf', height = 12, width = 8, dpi = 300)
+ggsave('rolling_incid_delta.pdf', height = 12, width = 8, dpi = 300)
 
 # plot omicron ------------------------------------------------------------
 
-facet_label <- c('Whole population', 'School closure', 'Factory closure')
-facet_hide <- levels(wsf$scenario)
-names(facet_label) <- facet_hide
 theme_delta <- function(){      # same theme used in 'plot delta'
         
         theme_classic()+
-                theme(axis.title = element_text(face = 'bold'),
+                theme(axis.title = element_text(color = 'black', size = 10),
                       legend.spacing.x=unit(0.1,'cm'), # 定义文本水平距离
                       legend.key.width=unit(1.5,'cm'), # 定义图例水平大小
                       legend.key.height=unit(0.5,'cm'), # 定义图例垂直大小
@@ -265,7 +263,7 @@ ag1 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129"),
@@ -274,7 +272,7 @@ ag1 <- wsf %>%
                            '60+ days since second dose', 
                            'At most partially vaccinated')) + 
         theme_classic()+
-        theme(axis.title = element_text(face = 'bold'),
+        theme(axis.title = element_text(color = 'black', size = 10),
               legend.spacing.x=unit(0.1,'cm'), # 定义文本水平距离
               legend.key.width=unit(1.5,'cm'), # 定义图例水平大小
               legend.key.height=unit(0.5,'cm'), # 定义图例垂直大小
@@ -288,7 +286,7 @@ ag1 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "0-9 years old",
+                y = "New cases per 10,000\n(0-9 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "free_y",
                    labeller = labeller(scenario = facet_label))+
@@ -307,7 +305,7 @@ ag2 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -315,7 +313,7 @@ ag2 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "10-19 years old",
+                y = "New cases per 10,000\n(10-19 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "free_y",
                    labeller = labeller(scenario = facet_label))
@@ -333,14 +331,14 @@ ag3 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) +
         theme_delta()+
         labs(
                 x = NULL,
-                y = "20-29 years old",
+                y = "New cases per 10,000\n(20-29 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "free_y",
                    labeller = labeller(scenario = facet_label))
@@ -358,7 +356,7 @@ ag4 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -366,7 +364,7 @@ ag4 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "30-39 years old",
+                y = "New cases per 10,000\n(30-39 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -384,7 +382,7 @@ ag5 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -393,7 +391,7 @@ ag5 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "40-49 years old",
+                y = "New cases per 10,000\n(40-49 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -411,7 +409,7 @@ ag6 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -420,7 +418,7 @@ ag6 <- wsf %>%
         
         labs(
                 x = NULL,
-                y = "50-59 years old",
+                y = "New cases per 10,000\n(50-59 years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed",
                    labeller = labeller(scenario = facet_label))
@@ -439,7 +437,7 @@ ag7 <- wsf %>%
         )+
         scale_x_continuous(
                 expand = expansion(0),
-                breaks = seq(0, 240, 40)
+                breaks = seq(0, 300, 60)
         )+
         scale_color_manual(values = c(
                 "#43b284","#0f7ba2","#fab255","#dd5129")) + 
@@ -447,7 +445,7 @@ ag7 <- wsf %>%
         
         labs(
                 x = 'Time (days)',
-                y = "60+ years old",
+                y = "New cases per 10,000\n(60+ years old)",
                 color = NULL)+
         facet_grid(cols = vars(scenario), scales =  "fixed")
 
@@ -460,4 +458,4 @@ patchwork <- ag1/
         ag7
 
 
-ggsave('rolling_week_omicron.pdf', height = 12, width = 8, dpi = 300)
+ggsave('rolling_incid_omicron.pdf', height = 12, width = 8, dpi = 300)

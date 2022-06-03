@@ -5,10 +5,12 @@ N = readmatrix('agePopulationVector.xlsx'); % the population vector (stratified 
 C = readmatrix('cntm_cut_factory.xlsx', Sheet='Sheet 1');   % the contact matrix
 
 
-params.Beta_cut_f   = C * 0.1589 ./ (N'); 
-Beta_28_cut_f = kron(params.Beta_cut_f, ones(4));
+% params.Beta_cut_f   = C * 0.1589 ./ (N'); 
+% Beta_28_cut_f = kron(params.Beta_cut_f, ones(4));
 % params.Beta_cut_s   = C * 0.1589 ./ (N');
 % Beta_28_cut_s = kron(params.Beta_cut_s, ones(4));
+params.Beta_cno   = C * 0.1589 ./ (N'); 
+Beta_28_cno = kron(params.Beta_cno, ones(4));
 
 % a series R0 for simulation
 %R0 = [0.2, 0.5:6.5];     R0 = R0'; 

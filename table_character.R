@@ -8,6 +8,8 @@ pacman::p_load(
 )
 
 df <- read.xlsx('cleaned_data.xlsx')
+index_df <- df %>% distinct(index_name, .keep_all = T) 
+table(index_df$index_job)
 
 # make age groups, vac status classify as at most partially and fully
 cat_ll <- df %>% 
@@ -99,3 +101,36 @@ sele_n %>%
         adorn_percentages(denominator = 'col') %>% 
         adorn_pct_formatting() %>% 
         adorn_ns(position = 'front')
+
+
+# compare ct value in different vaccination status ------------------------
+
+sele_p <- df %>% 
+        select(id, outcome, orf1ab, n_gene, vac_history) %>% 
+        filter(outcome == 1) %>% 
+        drop_na(orf1ab) %>% 
+        mutate(vac_history = replace(vac_history, vac_history == 1, 0)) 
+        
+shapiro.test(sele_p$orf1ab)
+shapiro.test(sele_p$n_gene)
+
+t.test(orf1ab ~ vac_history, data = sele_p)
+t.test(n_gene ~ vac_history, data = sele_p)
+
+sele_p %>% 
+        group_by(vac_history) %>% 
+        summarise(SD = sd(orf1ab),
+                  SD2 = sd(n_gene))
+
+# if ct-value <25, then change it to '<25', otherwise to '25-40'
+sele_p2 <- sele_p %>% 
+        mutate(orf1ab = case_when(
+                orf1ab < 25 ~ '<25',
+                orf1ab >= 25 ~ '>=25'
+        )) %>% 
+        mutate(n_gene = case_when(
+                n_gene < 25 ~ '<25',
+                n_gene >= 25 ~ '>=25'
+        ))
+sele_p2 %>% 
+        count(vac_history, n_gene)

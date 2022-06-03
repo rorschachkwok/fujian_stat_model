@@ -31,7 +31,7 @@ parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega
               omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
 INPUT <- c(t(V0), t(E0), t(P0), t(A0), t(I0), t(R0), t(C0)) # same order as ode return list
 
-t_range <- seq(from = 0, to = 270, by = 1) # vector with time steps
+t_range <- seq(from = 0, to = 365, by = 1) # vector with time steps
 
 
 # differential equations --------------------------------------------------
@@ -61,11 +61,6 @@ diff_eqs <- function(times, INPUT, parms){
 out <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
 out <- as.data.frame(out)
 
-# with(out, {
-#         plot(x = time, y = `169`)})
-# min(out$`1`)
-
-
 # change param to cut factory
 beta <- read.xlsx('Beta_28_cut_f.xlsx', sheet = 4, colNames = F)
 beta <- as.matrix(beta) 
@@ -86,6 +81,15 @@ parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega
 cut_s <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
 cut_s <- as.data.frame(cut_s)
 
+# change param to only community and others
+beta <- read.xlsx('Beta_28_cno.xlsx', sheet = 4, colNames = F)
+beta <- as.matrix(beta)
+parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
+              omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
+
+# simulate only community and others
+cno <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
+cno <- as.data.frame(cno)
 
 
 # df management -----------------------------------------------------------
@@ -232,8 +236,71 @@ sele_f <- cut_f %>%
         mutate(vac_group = fct_relevel(vac_group, 'vac4', 'vac3', 'vac2', 'vac1')) %>% 
         mutate(scenario = 'c_f')
 
+# manage community and others
+cno <- cno %>% 
+        pivot_longer(
+                cols = -1,
+                names_to = 'group',
+                values_to = 'value'
+        ) %>% 
+        mutate(status = as.numeric(group)) %>% 
+        
+        mutate(status = case_when(status %in% seq(    1,   m) ~ 'Susceptible',
+                                  status %in% seq(  m+1, 2*m) ~ 'Exposed',
+                                  status %in% seq(2*m+1, 3*m) ~ 'Pre-symptomatic',
+                                  status %in% seq(3*m+1, 4*m) ~ 'Asymptomatic',
+                                  status %in% seq(4*m+1, 5*m) ~ 'Infectious',
+                                  status %in% seq(5*m+1, 6*m) ~ 'Recovered',
+                                  status %in% seq(6*m+1, 7*m) ~ 'Cumulative')) %>% 
+        mutate(status = fct_relevel(status, "Susceptible", 'Exposed', 'Pre-symptomatic',
+                                    'Asymptomatic', 'Infectious', 'Recovered', 'Cumulative')) 
+for (i in 1:28) {
+        cno[cno$group %in% c(seq(i, 6*m+i, m)), 'group'] <- c(str_glue('age{age_id[i]}_vac{vac_id[i]}')) 
+}
 
-wsf <- bind_rows(sele_w, sele_s, sele_f)
+
+sele_cno <- cno %>% 
+        pivot_wider(names_from = 'status',
+                    values_from = 'value') %>% 
+        mutate(I_A = Asymptomatic + Infectious) %>% 
+        mutate(daily_new = Exposed * mu[1,1] * omega[1,1] + `Pre-symptomatic` * omegapp[1,1]) %>% 
+        left_join(pop, by = c('group' = 'group')) %>%
+        arrange(group, time) %>% 
+        group_by(group) %>% 
+        mutate(
+                mean_7day_new = slide_dbl(
+                        .x = daily_new,
+                        .i = time,
+                        .f = mean,
+                        .before = 6
+                )) %>% 
+        mutate(rolling_week_incid = mean_7day_new / n_fujian * 10000) %>% 
+        separate(group, into = c('age_group', 'vac_group'), sep = '_') %>% 
+        mutate(across(.cols = contains('group'),
+                      .fns  = as.factor)) %>% 
+        mutate(vac_group = fct_relevel(vac_group, 'vac4', 'vac3', 'vac2', 'vac1')) %>% 
+        mutate(scenario = 'cno')
+
+
+wsf <- bind_rows(sele_w, sele_s, sele_f, sele_cno)
 wsf <- wsf %>% 
         mutate(scenario = as.factor(scenario)) %>% 
-        mutate(scenario = fct_relevel(scenario, 'w', 'c_s', 'c_f'))
+        mutate(scenario = fct_relevel(scenario, 'w', 'c_s', 'c_f', 'cno'))
+
+# peak incidence among age groups and scenarios ---------------------------
+
+peak_incid <- wsf %>% group_by(time, age_group, scenario) %>% 
+        summarise(
+                sum_vac_incid = sum(rolling_week_incid, na.rm = T),
+                .groups = 'drop') %>%  
+        group_by(age_group, scenario) %>% 
+        summarise(peak_incid = max(sum_vac_incid, na.rm = T),
+                  .groups = 'drop') 
+w_peak_incid <- peak_incid %>% 
+        filter(scenario == 'w')
+w_peak_incid <- w_peak_incid$peak_incid
+
+reduce_incid <- peak_incid %>% 
+        mutate(w_peak_incid = rep(w_peak_incid, each = 4),
+               prop_to_w = peak_incid / w_peak_incid,
+               reduce_incid = 1 - prop_to_w)

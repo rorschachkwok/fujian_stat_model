@@ -1,3 +1,4 @@
+
 diff_eqs <- function(times, INPUT, parms){
         
         with(as.list(c(INPUT, parms)), {
@@ -47,6 +48,16 @@ parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega
 cut_s <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
 cut_s <- as.data.frame(cut_s)
 
+# change param to only community and others
+beta <- read.xlsx('Beta_28_cno.xlsx', sheet = 2, colNames = F)
+beta <- as.matrix(beta)
+parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
+              omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
+
+# simulate only community and others
+cno <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
+cno <- as.data.frame(cno)
+
 # run omicron -------------------------------------------------------------
 
 # change param to cut factory
@@ -69,15 +80,24 @@ parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega
 cut_s <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
 cut_s <- as.data.frame(cut_s)
 
+# change param to only community and others
+beta <- read.xlsx('Beta_28_cno.xlsx', sheet = 4, colNames = F)
+beta <- as.matrix(beta)
+parms <- list(kappa1 = kappa1, kappa2 = kappa2, HR = HR, beta=beta, mu=mu, omega=omega, omegap = omegap,
+              omegapp = omegapp, gamma=gamma, gammap = gammap, f = f)
 
+# simulate only community and others
+cno <- ode(INPUT, t_range, diff_eqs, parms, method = 'rk4')
+cno <- as.data.frame(cno)
 
-# df management -----------------------------------------------------------
+# data management -----------------------------------------------------------
 m <- 28
 age_id <- rep(1:7, each = 4)
 vac_id <- rep(1:4, 7)
 pop <- read.xlsx('pop_of_S_28.xlsx', sheet = 1, colNames = T)
 pop <- pop[, c("group", 'age_group', 'vac_group', "n_fujian")]
 
+# whole population management
 df <- out %>% 
         pivot_longer(
                 cols = -1,
@@ -124,7 +144,7 @@ sele_w <- df %>%
         mutate(vac_group = fct_relevel(vac_group, 'vac4', 'vac3', 'vac2', 'vac1')) %>% 
         mutate(scenario = 'w')
 
-# manage school
+# manage school closure
 cut_s <- cut_s %>% 
         pivot_longer(
                 cols = -1,
@@ -148,7 +168,6 @@ for (i in 1:28) {
 
 
 sele_s <- cut_s %>% 
-        # filter(status %in% c('Susceptible', 'Asymptomatic', 'Infectious', 'Pre-symptomatic', 'Cumulative')) %>% 
         pivot_wider(names_from = 'status',
                     values_from = 'value') %>% 
         mutate(I_A = Asymptomatic + Infectious) %>% 
@@ -171,7 +190,7 @@ sele_s <- cut_s %>%
         mutate(vac_group = fct_relevel(vac_group, 'vac4', 'vac3', 'vac2', 'vac1')) %>% 
         mutate(scenario = 'c_s')
 
-# manage factory
+# manage factory closure
 cut_f <- cut_f %>% 
         pivot_longer(
                 cols = -1,
@@ -195,7 +214,6 @@ for (i in 1:28) {
 
 
 sele_f <- cut_f %>% 
-        # filter(status %in% c('Susceptible', 'Asymptomatic', 'Infectious', 'Pre-symptomatic', 'Cumulative')) %>% 
         pivot_wider(names_from = 'status',
                     values_from = 'value') %>% 
         mutate(I_A = Asymptomatic + Infectious) %>% 
@@ -218,14 +236,62 @@ sele_f <- cut_f %>%
         mutate(vac_group = fct_relevel(vac_group, 'vac4', 'vac3', 'vac2', 'vac1')) %>% 
         mutate(scenario = 'c_f')
 
+# manage community and others
+cno <- cno %>% 
+        pivot_longer(
+                cols = -1,
+                names_to = 'group',
+                values_to = 'value'
+        ) %>% 
+        mutate(status = as.numeric(group)) %>% 
+        
+        mutate(status = case_when(status %in% seq(    1,   m) ~ 'Susceptible',
+                                  status %in% seq(  m+1, 2*m) ~ 'Exposed',
+                                  status %in% seq(2*m+1, 3*m) ~ 'Pre-symptomatic',
+                                  status %in% seq(3*m+1, 4*m) ~ 'Asymptomatic',
+                                  status %in% seq(4*m+1, 5*m) ~ 'Infectious',
+                                  status %in% seq(5*m+1, 6*m) ~ 'Recovered',
+                                  status %in% seq(6*m+1, 7*m) ~ 'Cumulative')) %>% 
+        mutate(status = fct_relevel(status, "Susceptible", 'Exposed', 'Pre-symptomatic',
+                                    'Asymptomatic', 'Infectious', 'Recovered', 'Cumulative')) 
+for (i in 1:28) {
+        cno[cno$group %in% c(seq(i, 6*m+i, m)), 'group'] <- c(str_glue('age{age_id[i]}_vac{vac_id[i]}')) 
+}
 
-wsf <- bind_rows(sele_w, sele_s, sele_f)
+
+sele_cno <- cno %>% 
+        pivot_wider(names_from = 'status',
+                    values_from = 'value') %>% 
+        mutate(I_A = Asymptomatic + Infectious) %>% 
+        mutate(daily_new = Exposed * mu[1,1] * omega[1,1] + `Pre-symptomatic` * omegapp[1,1]) %>% 
+        left_join(pop, by = c('group' = 'group')) %>%
+        arrange(group, time) %>% 
+        group_by(group) %>% 
+        mutate(
+                mean_7day_new = slide_dbl(
+                        .x = daily_new,
+                        .i = time,
+                        .f = mean,
+                        .before = 6
+                )) %>% 
+        mutate(rolling_week_incid = mean_7day_new / n_fujian * 10000) %>%
+        mutate(final_size = Cumulative / n_fujian) %>% 
+        separate(group, into = c('age_group', 'vac_group'), sep = '_') %>% 
+        mutate(across(.cols = contains('group'),
+                      .fns  = as.factor)) %>% 
+        mutate(vac_group = fct_relevel(vac_group, 'vac4', 'vac3', 'vac2', 'vac1')) %>% 
+        mutate(scenario = 'cno')
+
+
+wsf <- bind_rows(sele_w, sele_s, sele_f, sele_cno)
 wsf <- wsf %>% 
         mutate(scenario = as.factor(scenario)) %>% 
-        mutate(scenario = fct_relevel(scenario, 'w', 'c_s', 'c_f'))
+        mutate(scenario = fct_relevel(scenario, 'w', 'c_s', 'c_f', 'cno'))
+
 
 # plot
-facet_label <- c('Whole population', 'School closure', 'Factory closure')
+facet_label <- c('Whole population', 'School closure', 
+                 'Factory closure', 'School + factory closure') 
 facet_hide <- levels(wsf$scenario)
 names(facet_label) <- facet_hide
 
@@ -330,4 +396,4 @@ o_final <- ggplot(data = hfinal, aes(x = vac_group,   # x-axis is case age
         )
 
 final_size_plot <- plot_grid(d_final, o_final, nrow = 2)
-ggsave('final_size_plot.pdf', height = 10, width = 8, dpi = 300)
+ggsave('final_size_plot.pdf', height = 12, width = 12, dpi = 300)
