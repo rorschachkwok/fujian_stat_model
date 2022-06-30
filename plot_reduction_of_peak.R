@@ -13,6 +13,7 @@ d_peak_reduction <- reduce_incid %>% filter(scenario != 'w') %>%
         geom_col(fill = 'cornsilk3') +
         geom_text(aes(label = scales::percent(1 - prop_to_w, accuracy = 0.01)), 
                   vjust = -0.2, 
+                  size = 3.5,
                   colour = "black")+ 
         scale_y_continuous(
                 expand = expansion(0),
@@ -39,6 +40,7 @@ o_peak_reduction <- reduce_incid %>% filter(scenario != 'w') %>%
         geom_col(fill = 'cornsilk3') +
         geom_text(aes(label = scales::percent(1 - prop_to_w, accuracy = 0.01)), 
                   vjust = -0.2, 
+                  size = 3.5,
                   colour = "black")+ 
         scale_y_continuous(
                 expand = expansion(0),
@@ -61,4 +63,4 @@ patch_reduction <- d_peak_reduction /
         o_peak_reduction
 patch_reduction + plot_annotation(tag_levels = 'a')
 
-ggsave('plot_peak_reduction.pdf', height = 6, width = 13, dpi = 300)
+ggsave('Fig6.pdf', height = 6, width = 13, dpi = 300)

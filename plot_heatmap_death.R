@@ -193,6 +193,6 @@ o <- ggplot(data = hmap_wsf,aes(x = vac,   # x-axis is case age
         )
 
 death_toll <- plot_grid(d, o, nrow = 2)
-ggsave('death_toll.pdf', height = 12, width = 12, dpi = 300)
+ggsave('Fig7.pdf', height = 12, width = 12, dpi = 300)
 
         

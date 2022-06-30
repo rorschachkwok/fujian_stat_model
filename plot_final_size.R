@@ -396,4 +396,4 @@ o_final <- ggplot(data = hfinal, aes(x = vac_group,   # x-axis is case age
         )
 
 final_size_plot <- plot_grid(d_final, o_final, nrow = 2)
-ggsave('final_size_plot.pdf', height = 12, width = 12, dpi = 300)
+ggsave('Fig5.pdf', height = 12, width = 12, dpi = 300)

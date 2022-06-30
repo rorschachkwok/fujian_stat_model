@@ -1,11 +1,13 @@
 pacman::p_load(
         tidyverse,
         openxlsx,
-        ggsci,
-        patchwork
-        
+        patchwork,
+        paletteer
 )
-
+# paletteer_d("PNWColors::Winter")
+# paletteer_d("futurevisions::pso")
+# paletteer_d("beyonce::X7")
+# paletteer_d("futurevisions::ceres")
 cnt_df <- read.xlsx('contactMatrix.xlsx', sheet = 2, colNames = T)
 cnt_long <- cnt_df %>% 
         pivot_longer(
@@ -15,18 +17,15 @@ cnt_long <- cnt_df %>%
         ) %>% 
         rename(index_case = 1)
 
-
-
 p_w <- ggplot(data = cnt_long)+    # use long data, with proportions as Freq
         geom_tile(                    # visualize it in tiles
                 aes(x = index_case,   # x-axis is case age
                     y = contact,     # y-axis is infector age
-                    fill = freq),
-                color = 'white')+     # color of the tile is the Freq column in the data
+                    fill = freq))+     # color of the tile is the Freq column in the data
         coord_fixed()+ # 保持为正方形
-        scale_fill_material("indigo",
-                            limits=c(0, 4.2),
-                            breaks=seq(0,4,by=1))+
+        scale_fill_gradientn(colours = c(rev(paletteer_d("futurevisions::ceres"))),
+                            limits=c(0, 9),
+                            breaks=seq(0,8,by=2))+
         scale_y_discrete(
                 expand = c(0,0)
         )+
@@ -34,7 +33,7 @@ p_w <- ggplot(data = cnt_long)+    # use long data, with proportions as Freq
                 expand = c(0,0)
         )+
         
-        theme_minimal()+
+        theme_bw()+
         theme(
                 axis.text.y = element_text(vjust=0.2),            # axis text alignment
                 axis.ticks = element_line(size=0.5),
@@ -66,12 +65,11 @@ p_s <- ggplot(data = cnt_s_long)+    # use long data, with proportions as Freq
         geom_tile(                    # visualize it in tiles
                 aes(x = index_case,   # x-axis is case age
                     y = contact,     # y-axis is infector age
-                    fill = freq),
-                color = 'white')+     # color of the tile is the Freq column in the data
+                    fill = freq))+     # color of the tile is the Freq column in the data
         coord_fixed()+ 
-        scale_fill_material("indigo",
-                            limits=c(0, 4.2),
-                            breaks=seq(0,4,by=1))+
+        scale_fill_gradientn(colours = c(rev(paletteer_d("futurevisions::ceres"))),
+                             limits=c(0, 9),
+                             breaks=seq(0,8,by=2))+
         
         scale_y_discrete(
                 expand = c(0,0)
@@ -80,7 +78,7 @@ p_s <- ggplot(data = cnt_s_long)+    # use long data, with proportions as Freq
                 expand = c(0,0)
         )+
         
-        theme_minimal()+
+        theme_bw()+
         theme(
                 axis.text.y = element_text(vjust=0.2),            # axis text alignment
                 axis.ticks = element_line(size=0.5),
@@ -113,12 +111,11 @@ p_f <- ggplot(data = cnt_f_long)+    # use long data, with proportions as Freq
         geom_tile(                    # visualize it in tiles
                 aes(x = index_case,   # x-axis is case age
                     y = contact,     # y-axis is infector age
-                    fill = freq),
-                color = 'white')+     # color of the tile is the Freq column in the data
+                    fill = freq))+     # color of the tile is the Freq column in the data
         coord_fixed()+ 
-        scale_fill_material("indigo",
-                            limits=c(0, 4.2),
-                            breaks=seq(0,4,by=1))+
+        scale_fill_gradientn(colours = c(rev(paletteer_d("futurevisions::ceres"))),
+                             limits=c(0, 9),
+                             breaks=seq(0,8,by=2))+
         
         scale_y_discrete(
                 expand = c(0,0)
@@ -127,7 +124,7 @@ p_f <- ggplot(data = cnt_f_long)+    # use long data, with proportions as Freq
                 expand = c(0,0)
         )+
         
-        theme_minimal()+
+        theme_bw()+
         theme(
                 axis.text.y = element_text(vjust=0.2),            # axis text alignment
                 axis.ticks = element_line(size=0.5),
@@ -159,12 +156,11 @@ p_cno <- ggplot(data = cnt_cno_long)+    # use long data, with proportions as Fr
         geom_tile(                    # visualize it in tiles
                 aes(x = index_case,   # x-axis is case age
                     y = contact,     # y-axis is infector age
-                    fill = freq),
-                color = 'white')+     # color of the tile is the Freq column in the data
+                    fill = freq))+     # color of the tile is the Freq column in the data
         coord_fixed()+ 
-        scale_fill_material("indigo",
-                            limits=c(0, 4.2),
-                            breaks=seq(0,4,by=1))+
+        scale_fill_gradientn(colours = c(rev(paletteer_d("futurevisions::ceres"))),
+                             limits=c(0, 9),
+                             breaks=seq(0,8,by=2))+
         
         scale_y_discrete(
                 expand = c(0,0)
@@ -173,7 +169,7 @@ p_cno <- ggplot(data = cnt_cno_long)+    # use long data, with proportions as Fr
                 expand = c(0,0)
         )+
         
-        theme_minimal()+
+        theme_bw()+
         theme(
                 axis.text.y = element_text(vjust=0.2),            # axis text alignment
                 axis.ticks = element_line(size=0.5),
@@ -193,4 +189,4 @@ patchwork <-  (p_w | p_s) /
               (p_f | p_cno)
 patchwork + plot_annotation(tag_levels = 'a')      
 
-ggsave('plot_cntm.pdf', height = 9, width = 10.5, dpi = 300)
+ggsave('Fig2.pdf', height = 9, width = 10.5, dpi = 300)

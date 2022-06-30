@@ -230,7 +230,7 @@ patchwork <- ag1/
         ag7
 
 
-ggsave('rolling_incid_delta.pdf', height = 12, width = 8, dpi = 300)
+ggsave('Fig3.pdf', height = 12, width = 8, dpi = 300)
 
 # plot omicron ------------------------------------------------------------
 
@@ -458,4 +458,4 @@ patchwork <- ag1/
         ag7
 
 
-ggsave('rolling_incid_omicron.pdf', height = 12, width = 8, dpi = 300)
+ggsave('Fig4.pdf', height = 12, width = 8, dpi = 300)

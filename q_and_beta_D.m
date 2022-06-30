@@ -2,14 +2,14 @@ clear all; close all; clc;
 
 import_params_delta;   % import parameters omega, gamma, p, kappa,...
 N = readmatrix('agePopulationVector.xlsx'); % the population vector (stratified by age)
-C = readmatrix('cntm_cut_factory.xlsx', Sheet='Sheet 1');   % the contact matrix
+C = readmatrix('cntm_cno.xlsx', Sheet='Sheet 1');   % the contact matrix
 
 
-% params.Beta_cut_f   = C * 0.1589 ./ (N'); 
+% params.Beta_cut_f   = C * 0.0802 ./ (N'); 
 % Beta_28_cut_f = kron(params.Beta_cut_f, ones(4));
-% params.Beta_cut_s   = C * 0.1589 ./ (N');
+% params.Beta_cut_s   = C * 0.0802 ./ (N');
 % Beta_28_cut_s = kron(params.Beta_cut_s, ones(4));
-params.Beta_cno   = C * 0.1589 ./ (N'); 
+params.Beta_cno   = C * 0.0802 ./ (N'); 
 Beta_28_cno = kron(params.Beta_cno, ones(4));
 
 % a series R0 for simulation
